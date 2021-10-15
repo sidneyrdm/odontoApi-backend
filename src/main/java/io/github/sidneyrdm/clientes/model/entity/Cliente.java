@@ -33,6 +33,12 @@ public class Cliente {
     @JsonFormat(pattern = "dd/MM/yyyy")
     private LocalDate dataCadastro;
 
+    @Column
+    private String facebook;
+
+    @Column
+    private String instagram;
+
     @PrePersist
     public void prePersist(){
         setDataCadastro(LocalDate.now());
