@@ -9,15 +9,21 @@ import javax.validation.constraints.NotNull;
 @Data
 @NoArgsConstructor
 public class ServicoPrestadoDTO {
+
     @NotEmpty(message = "{campo.descricao.obrigatorio}")
     private String descricao;
 
-    @NotEmpty(message = "{campo.preco.obrigatorio}")
-    private String preco;
+    @NotEmpty(message = "{campo.valor.obrigatorio}")
+    private String valor;
 
     @NotEmpty(message = "{campo.data.obrigatorio}")
     private String data;
 
+    private String dataPagamento;
+
     @NotNull(message = "{campo.cliente.obrigatorio}")
     private Integer idCliente;
+
+    @NotEmpty(message = "{campo.situacaoPagamento.obrigatorio}")
+    private String situacaoPagamento;
 }

@@ -25,7 +25,15 @@ public class ServicoPrestado {
     @Column
     private BigDecimal valor;
 
-    @Column
+    @Column(updatable = false)
     @JsonFormat(pattern = "dd/MM/yyyy")
     private LocalDate data;
+
+    @Column
+    @JsonFormat(pattern = "dd/MM/yyyy")
+    private LocalDate dataPagamento;
+
+    @Column(name = "situacao_pagamento", nullable = false)
+    private String situacaoPagamento;
+
 }
