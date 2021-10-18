@@ -19,4 +19,8 @@ public interface ServicoPrestadoRepository extends JpaRepository<ServicoPrestado
             " where upper( c.nome ) like upper( :nome )")
     List<ServicoPrestado> findByNomeCliente(
             @Param("nome") String nome);
+
+    @Query(" select s from ServicoPrestado s join s.cliente c " +
+            " where s.id = :id")
+    ServicoPrestado acharPorId(@Param("id") Integer id);
 }

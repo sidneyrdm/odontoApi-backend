@@ -1,9 +1,11 @@
 package io.github.sidneyrdm.clientes.rest;
 
 import io.github.sidneyrdm.clientes.model.entity.Cliente;
+import io.github.sidneyrdm.clientes.model.entity.Servico;
 import io.github.sidneyrdm.clientes.model.entity.ServicoPrestado;
 import io.github.sidneyrdm.clientes.model.repository.ClienteRepository;
 import io.github.sidneyrdm.clientes.model.repository.ServicoPrestadoRepository;
+import io.github.sidneyrdm.clientes.model.repository.ServicoRepository;
 import io.github.sidneyrdm.clientes.rest.dto.ServicoPrestadoDTO;
 import io.github.sidneyrdm.clientes.util.BigDecimalConverter;
 import lombok.RequiredArgsConstructor;
@@ -22,6 +24,7 @@ import java.util.List;
 public class ServicoPrestadoController  {
 
     private final ClienteRepository clienteRepository;
+    private final ServicoRepository servicoRepository;
     private final ServicoPrestadoRepository repository;
     private final BigDecimalConverter bigDecimalConverter;
 
@@ -33,13 +36,13 @@ public class ServicoPrestadoController  {
         LocalDate dataPg = LocalDate.parse(dto.getData(), DateTimeFormatter.ofPattern("dd/MM/yyyy"));
         Integer idCliente = dto.getIdCliente();
 
+        //Preparando cliente
         Cliente cliente =
                 clienteRepository
                         .findById(idCliente)
                         .orElseThrow(() ->
                                 new ResponseStatusException(
                                         HttpStatus.BAD_REQUEST, "Cliente inexistente."));
-
 
         ServicoPrestado servicoPrestado = new ServicoPrestado();
         servicoPrestado.setDescricao(dto.getDescricao());
@@ -65,8 +68,9 @@ public class ServicoPrestadoController  {
         return repository.findByNomeClienteAndMes("%" + nome + "%", mes);
     }
 
+
     @GetMapping("{id}")
-    public ServicoPrestado acharPorId( @PathVariable Integer id ){
+    public ServicoPrestado findByID( @PathVariable Integer id ){
         return repository
                 .findById(id)
                 .orElseThrow( () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Serviço não encontrado") );
@@ -95,7 +99,6 @@ public class ServicoPrestadoController  {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void atualizar( @PathVariable Integer id,
                            @RequestBody @Valid ServicoPrestado servicoAtualizado ) {
-
 
         repository
                 .findById(id)

@@ -2,12 +2,14 @@ package io.github.sidneyrdm.clientes.rest;
 
 import io.github.sidneyrdm.clientes.model.entity.Cliente;
 import io.github.sidneyrdm.clientes.model.repository.ClienteRepository;
+import io.github.sidneyrdm.clientes.model.repository.ServicoPrestadoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import javax.validation.Valid;
+import java.sql.SQLOutput;
 import java.util.List;
 
 @RestController
@@ -15,10 +17,12 @@ import java.util.List;
 public class ClienteController {
 
     private final ClienteRepository repository;
+    private final ServicoPrestadoRepository servicoRepository;
 
     @Autowired
-    public ClienteController(ClienteRepository repository) {
+    public ClienteController(ClienteRepository repository, ServicoPrestadoRepository servicoRepository) {
         this.repository = repository;
+        this.servicoRepository = servicoRepository;
     }
 
     @GetMapping
@@ -34,9 +38,28 @@ public class ClienteController {
 
     @GetMapping("{id}")
     public Cliente acharPorId( @PathVariable Integer id ){
-        return repository
-                .findById(id)
-                .orElseThrow( () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Cliente não encontrado") );
+
+        System.out.println("entrou na busca pelo id= "+id);
+        Integer novaID = null;
+        try{
+            System.out.println("Entrou no TRY");
+           novaID = servicoRepository.acharPorId(id).getCliente().getId();
+        }catch (NullPointerException e){
+            System.out.println("Caiu no catch");
+        }
+
+        if(novaID == null){
+            System.out.println("entrou no If");
+            return repository
+                    .findById(id)
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Cliente não encontrado"));
+        }
+        else {
+            System.out.println("entrou no else");
+            return repository
+                    .findById(novaID)
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Cliente não encontrado"));
+        }
     }
 
     @DeleteMapping("{id}")
@@ -60,6 +83,8 @@ public class ClienteController {
                 .map( cliente -> {
                     cliente.setNome(clienteAtualizado.getNome());
                     cliente.setCpf(clienteAtualizado.getCpf());
+                    cliente.setInstagram(clienteAtualizado.getInstagram());
+                    cliente.setFacebook(clienteAtualizado.getFacebook());
                     return repository.save(cliente);
                 })
                 .orElseThrow( () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Cliente não encontrado") );
