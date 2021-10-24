@@ -39,6 +39,10 @@ public class Cliente {
     @Column
     private String instagram;
 
+    @Column
+    @Lob
+    private byte[] foto;
+
     @PrePersist
     public void prePersist(){
         setDataCadastro(LocalDate.now());

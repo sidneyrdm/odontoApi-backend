@@ -3,14 +3,19 @@ package io.github.sidneyrdm.clientes.rest;
 import io.github.sidneyrdm.clientes.model.entity.Cliente;
 import io.github.sidneyrdm.clientes.model.repository.ClienteRepository;
 import io.github.sidneyrdm.clientes.model.repository.ServicoPrestadoRepository;
+import org.apache.tomcat.util.http.fileupload.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
+import javax.servlet.http.Part;
 import javax.validation.Valid;
+import java.io.IOException;
+import java.io.InputStream;
 import java.sql.SQLOutput;
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/clientes")
@@ -88,5 +93,25 @@ public class ClienteController {
                     return repository.save(cliente);
                 })
                 .orElseThrow( () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Cliente não encontrado") );
+    }
+
+    @PutMapping("{id}/foto")
+    public byte[] addFoto(@PathVariable Integer id, @RequestParam("foto") Part arquivo){
+        Optional<Cliente> cliente = repository.findById(id);
+
+        return cliente.map(cl -> {
+            try{
+                InputStream inputStream = arquivo.getInputStream(); //recebe o arquivo
+                byte[] bytes = new byte[(int)arquivo.getSize()];
+                IOUtils .readFully(inputStream, bytes); //pega o inputstream e joga dentro do array de bytes
+                cl.setFoto(bytes);
+                repository.save(cl);
+                inputStream.close(); // boas práticas, sempre fechar o InputStream
+                return bytes;
+            }catch (IOException e){
+                return null;
+            }
+        }).orElse(null);
+
     }
 }
