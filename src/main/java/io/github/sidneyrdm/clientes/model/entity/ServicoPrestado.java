@@ -40,4 +40,12 @@ public class ServicoPrestado {
     @Column(name = "situacao_pagamento", nullable = false)
     private String situacaoPagamento;
 
+    @Column
+    @Lob
+    private byte[] fotoAntes;
+
+    @Column
+    @Lob
+    private byte[] fotoDepois;
+
 }

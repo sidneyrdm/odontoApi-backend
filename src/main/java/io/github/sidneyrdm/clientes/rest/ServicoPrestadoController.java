@@ -9,14 +9,23 @@ import io.github.sidneyrdm.clientes.model.repository.ServicoRepository;
 import io.github.sidneyrdm.clientes.rest.dto.ServicoPrestadoDTO;
 import io.github.sidneyrdm.clientes.util.BigDecimalConverter;
 import lombok.RequiredArgsConstructor;
+import org.apache.tomcat.util.http.fileupload.IOUtils;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
+import javax.servlet.http.Part;
 import javax.validation.Valid;
+import java.io.IOException;
+import java.io.InputStream;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/servicos-prestados")
@@ -55,9 +64,19 @@ public class ServicoPrestadoController  {
         return repository.save(servicoPrestado);
     }
 
-    @GetMapping("/all")
+     /* @GetMapping("/all")
     public List<ServicoPrestado> getAll() {
         return repository.findAll();
+    }*/
+
+    @GetMapping("/all")
+    public Page<ServicoPrestado> getAll(
+           @RequestParam(value = "page", defaultValue = "0") Integer pagina,
+           @RequestParam(value = "size", defaultValue = "10") Integer tamanhoPagina
+    ) {
+        Sort sort = Sort.by(Sort.Direction.DESC, "id");
+        PageRequest pageRequest = PageRequest.of(pagina, tamanhoPagina, sort);
+        return repository.findAll(pageRequest);
     }
 
     @GetMapping
@@ -113,6 +132,47 @@ public class ServicoPrestadoController  {
                     return repository.save(servico);
                 })
                 .orElseThrow( () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Servico nao encontrado") );
+
+    }
+
+
+    @PutMapping("{id}/fotoAntes")
+    public byte[] addFotoAntes(@PathVariable Integer id, @RequestParam("fotoAntes") Part arquivo){
+        Optional<ServicoPrestado> servicoPrestado = repository.findById(id);
+
+        return servicoPrestado.map(sp -> {
+            try{
+                InputStream inputStream = arquivo.getInputStream(); //recebe o arquivo
+                byte[] bytes = new byte[(int)arquivo.getSize()];
+                IOUtils.readFully(inputStream, bytes); //pega o inputstream e joga dentro do array de bytes
+                sp.setFotoAntes(bytes);
+                repository.save(sp);
+                inputStream.close(); // boas práticas, sempre fechar o InputStream
+                return bytes;
+            }catch (IOException e){
+                return null;
+            }
+        }).orElse(null);
+
+    }
+
+    @PutMapping("{id}/fotoDepois")
+    public byte[] addFotoDepois(@PathVariable Integer id, @RequestParam("fotoDepois") Part arquivo){
+        Optional<ServicoPrestado> servicoPrestado = repository.findById(id);
+
+        return servicoPrestado.map(sp -> {
+            try{
+                InputStream inputStream = arquivo.getInputStream(); //recebe o arquivo
+                byte[] bytes = new byte[(int)arquivo.getSize()];
+                IOUtils.readFully(inputStream, bytes); //pega o inputstream e joga dentro do array de bytes
+                sp.setFotoDepois(bytes);
+                repository.save(sp);
+                inputStream.close(); // boas práticas, sempre fechar o InputStream
+                return bytes;
+            }catch (IOException e){
+                return null;
+            }
+        }).orElse(null);
 
     }
 }
