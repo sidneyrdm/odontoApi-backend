@@ -102,6 +102,14 @@ public class ServicoPrestadoController  {
         return repository.findByNomeCliente("%" + nome);
     }
 
+    @GetMapping("/consulta/mes")
+    public List<ServicoPrestado> getByMes(
+            @RequestParam(value = "nome", required = false, defaultValue = "") String nome,
+            @RequestParam(value = "mes", required = false) Integer mes
+    ) {
+        return repository.findByNomeClienteAndMes("%" + nome + "%", mes);
+    }
+
     @DeleteMapping("{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deletar( @PathVariable Integer id ){
